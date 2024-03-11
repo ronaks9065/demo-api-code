@@ -5,7 +5,7 @@ docker pull ronak1907/webapp:latest
 
 # current date and time for name
 current_datetime=$(TZ="Asia/Kolkata" date +"%d.%m.%Y.%M.%H")
-report_filename="trivy.reports.${current_datetime}.html"
+report_filename="trivy.reports.${current_datetime}.json"
 
 echo "Scanning Docker image using Trivy"
 wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb 
@@ -31,10 +31,6 @@ else
 fi
 trivy --severity LOW,MEDIUM,HIGH ronak1907/webapp:latest > "$report_filename"
 aws s3 cp "$report_filename" s3://trivy-scan-bucket/"$report_filename"
-# aws sns publish --topic-arn "arn:aws:sns:ap-south-1:149815208654:trivy_scan_mail" --subject "Trivy Report" --message "Trivy report is available at view-source:https://trivy-scan-bucket.s3.ap-south-1.amazonaws.com/$report_filename View Trivy Scan Report."
-# aws sns publish --topic-arn "arn:aws:sns:ap-south-1:149815208654:trivy_scan_mail" \
-#   --subject "Trivy Report" \
-#   --message "Trivy report is available at https://trivy-scan-bucket.s3.ap-south-1.amazonaws.com/$report_filename View Trivy Scan Report."
 aws sns publish --topic-arn "arn:aws:sns:ap-south-1:149815208654:trivy_scan_mail" \
   --subject "Trivy Report" \
-  --message "Trivy report is available at <a href=\"view-source:https://trivy-scan-bucket.s3.ap-south-1.amazonaws.com/$report_filename\">View Trivy Scan Report</a>."
+  --message "Trivy report is available at https://trivy-scan-bucket.s3.ap-south-1.amazonaws.com/$report_filename View Trivy Scan Report"
